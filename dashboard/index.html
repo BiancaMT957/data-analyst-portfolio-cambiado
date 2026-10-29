@@ -1,0 +1,502 @@
+<title>DataRetail Levante — Dashboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ── Design tokens
+   Layout: header band · KPI strip · 2-col chart grid
+   Palette: slate-navy header · coral accent · blue / green / amber secondaries */
+:root {
+  --bg:      #F1F5F9;
+  --surface: #FFFFFF;
+  --header:  #0F172A;
+  --fg:      #1E293B;
+  --muted:   #64748B;
+  --border:  #CBD5E1;
+  --accent:  #E5533C;
+  --a2:      #2563EB;
+  --a3:      #059669;
+  --a4:      #D97706;
+  --a5:      #7C3AED;
+  --shadow:  0 1px 3px rgba(15,23,42,.09), 0 1px 2px rgba(15,23,42,.05);
+  --r:       10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:      #0F172A;
+    --surface: #1E293B;
+    --header:  #020617;
+    --fg:      #E2E8F0;
+    --muted:   #94A3B8;
+    --border:  #334155;
+    --shadow:  0 1px 4px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:      #0F172A;
+  --surface: #1E293B;
+  --header:  #020617;
+  --fg:      #E2E8F0;
+  --muted:   #94A3B8;
+  --border:  #334155;
+  --shadow:  0 1px 4px rgba(0,0,0,.35);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0 }
+
+body {
+  font-family: 'Barlow', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+  padding-left:  max(16px, env(safe-area-inset-left,  0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+}
+
+/* ── Header ── */
+.site-header {
+  background: var(--header);
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)))
+                 calc(-1 * max(16px, env(safe-area-inset-right,0px)));
+  padding: 18px max(24px, env(safe-area-inset-right,0px))
+           18px max(24px, env(safe-area-inset-left, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.site-header h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.15rem, 2.8vw, 1.5rem);
+  letter-spacing: .03em;
+  color: #F1F5F9;
+  text-wrap: balance;
+}
+.site-header h1 em { color: var(--accent); font-style: normal }
+.header-right { display: flex; align-items: center; gap: 10px }
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #94A3B8;
+  padding: 3px 10px;
+  border: 1px solid #334155;
+  border-radius: 99px;
+}
+
+/* ── Layout ── */
+.main { padding-block: 20px; display: flex; flex-direction: column; gap: 16px }
+
+/* ── KPI strip ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr) } }
+@media (max-width: 380px) { .kpi-grid { grid-template-columns: 1fr } }
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px 18px 14px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kpi-card.highlight { border-left: 3px solid var(--accent) }
+.kpi-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.kpi-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  font-weight: 700;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+.kpi-value small { font-size: .45em; font-weight: 600; opacity: .7 }
+.kpi-sub { font-size: 11px; color: var(--muted) }
+.kpi-up  { color: var(--a3); font-weight: 600 }
+.kpi-hot { color: var(--accent); font-weight: 600 }
+
+/* ── Chart grid ── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.chart-grid .full { grid-column: 1 / -1 }
+@media (max-width: 640px) {
+  .chart-grid { grid-template-columns: 1fr }
+  .chart-grid .full { grid-column: 1 }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+.card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.card-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .9rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.card-sub { font-size: 11px; color: var(--muted) }
+
+/* ── Top clients list ── */
+.client-list { display: flex; flex-direction: column; gap: 12px }
+.client-row  { display: flex; align-items: center; gap: 10px; min-width: 0 }
+.client-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg);
+  flex: 0 0 auto;
+  width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.client-bar-outer {
+  flex: 1;
+  height: 7px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+  min-width: 0;
+}
+.client-bar-inner {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.client-amt {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  width: 68px;
+  text-align: right;
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  padding-bottom: 16px;
+  letter-spacing: .03em;
+}
+</style>
+
+<header class="site-header">
+  <h1>DataRetail <em>Levante</em>, S.L. — Panel Comercial</h1>
+  <div class="header-right">
+    <span class="badge">2025 · SQLite + Python</span>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- KPIs -->
+  <section class="kpi-grid" aria-label="Indicadores clave">
+    <div class="kpi-card highlight">
+      <div class="kpi-label">Facturación Total</div>
+      <div class="kpi-value">17.786 <small>€</small></div>
+      <div class="kpi-sub">Enero – Septiembre 2025</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ventas Registradas</div>
+      <div class="kpi-value">24</div>
+      <div class="kpi-sub kpi-hot">Ticket medio: 741 €</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Clientes Activos</div>
+      <div class="kpi-value">12</div>
+      <div class="kpi-sub">Empresas y autónomos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Mejor Mes</div>
+      <div class="kpi-value">Jun</div>
+      <div class="kpi-sub kpi-up">↑ 3.857 € facturados</div>
+    </div>
+  </section>
+
+  <!-- Charts -->
+  <section class="chart-grid" aria-label="Gráficos de ventas">
+
+    <!-- Evolución mensual — full width -->
+    <div class="card full">
+      <div class="card-header">
+        <span class="card-title">Evolución Mensual de Ventas</span>
+        <span class="card-sub">Facturación real con descuentos · 2025</span>
+      </div>
+      <div style="position:relative;height:200px">
+        <canvas id="cMensual"></canvas>
+      </div>
+    </div>
+
+    <!-- Top productos -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Top 5 Productos</span>
+        <span class="card-sub">Por importe generado (€)</span>
+      </div>
+      <div style="position:relative;height:210px">
+        <canvas id="cProductos"></canvas>
+      </div>
+    </div>
+
+    <!-- Canal de venta -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Canal de Venta</span>
+        <span class="card-sub">Facturación por canal</span>
+      </div>
+      <div style="position:relative;height:210px">
+        <canvas id="cCanal"></canvas>
+      </div>
+    </div>
+
+    <!-- Top clientes -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Top 5 Clientes</span>
+        <span class="card-sub">Total comprado en 2025</span>
+      </div>
+      <div class="client-list" id="clientList"></div>
+    </div>
+
+    <!-- Clientes por provincia -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Clientes por Provincia</span>
+        <span class="card-sub">Distribución geográfica</span>
+      </div>
+      <div style="position:relative;height:210px">
+        <canvas id="cProvincia"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer class="footer">
+  DataRetail Levante, S.L. · Caso práctico — Data Analyst Portfolio · Python · SQL · SQLite · Pandas
+</footer>
+
+<script>
+/* ── Datos exportados de ventas.db ────────────────────────────────── */
+const DATA = {
+  mensual: {
+    meses:  ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep'],
+    totales:[3328.3,1087.3,1669.3,2288.5,1836.0,3857.24,1488.35,1231.0,1001.0]
+  },
+  productos: {
+    nombres:['Portátil Lenovo\nThinkBook','Monitor 24\npulgadas','Consultoría\nPower BI','Silla\nergonómica','Licencia\nantivirus anual'],
+    totales:[4602.24,2226.0,1975.0,1864.05,1073.0]
+  },
+  canal: {
+    nombres:['Presencial','Online','Teléfono'],
+    totales:[8698.35,6287.14,2801.5]
+  },
+  clientes: [
+    {nombre:'Logística Sureste',    total:3240.74},
+    {nombre:'Hierros Levante S.A.', total:2870.0 },
+    {nombre:'Academia San Vicente', total:2193.05},
+    {nombre:'Hotel Bahía Azul',     total:1563.0 },
+    {nombre:'Distribuciones Costa', total:1363.0 }
+  ],
+  provincias: {
+    nombres:['Alicante','Valencia','Murcia','Madrid'],
+    clientes:[7,2,2,1]
+  }
+};
+
+/* ── Helpers ─────────────────────────────────────────────────────── */
+const cs = () => getComputedStyle(document.documentElement);
+const tok = () => ({
+  fg:     cs().getPropertyValue('--fg').trim(),
+  muted:  cs().getPropertyValue('--muted').trim(),
+  border: cs().getPropertyValue('--border').trim(),
+  surf:   cs().getPropertyValue('--surface').trim(),
+  accent: cs().getPropertyValue('--accent').trim(),
+  a2:     cs().getPropertyValue('--a2').trim(),
+  a3:     cs().getPropertyValue('--a3').trim(),
+  a4:     cs().getPropertyValue('--a4').trim(),
+  a5:     cs().getPropertyValue('--a5').trim(),
+});
+const fmt = v => v.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+const grid  = t => ({color: t.border, lineWidth:1});
+const ticks = t => ({color: t.muted, font:{family:"'Barlow',sans-serif",size:11}});
+
+Chart.defaults.font.family = "'Barlow', sans-serif";
+
+/* ── 1. Línea mensual ────────────────────────────────────────────── */
+(function() {
+  const t = tok();
+  const ctx = document.getElementById('cMensual').getContext('2d');
+  const g = ctx.createLinearGradient(0,0,0,200);
+  g.addColorStop(0,'rgba(229,83,60,.22)');
+  g.addColorStop(1,'rgba(229,83,60,0)');
+  new Chart(ctx,{
+    type:'line',
+    data:{
+      labels: DATA.mensual.meses,
+      datasets:[{
+        data: DATA.mensual.totales,
+        borderColor: t.accent, backgroundColor: g,
+        borderWidth: 2.5, pointBackgroundColor: t.accent,
+        pointRadius:4, pointHoverRadius:7,
+        fill:true, tension:.35
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>' '+fmt(c.parsed.y)}}
+      },
+      scales:{
+        x:{grid:grid(t), ticks:ticks(t), border:{display:false}},
+        y:{grid:grid(t), ticks:{...ticks(t),callback:v=>v.toLocaleString('es-ES')+' €'},
+           border:{display:false}}
+      }
+    }
+  });
+})();
+
+/* ── 2. Top productos (barras horizontales) ──────────────────────── */
+(function() {
+  const t = tok();
+  const ctx = document.getElementById('cProductos').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels: DATA.productos.nombres,
+      datasets:[{
+        data: DATA.productos.totales,
+        backgroundColor:[t.accent,t.a2,t.a3,t.a4,t.a5],
+        borderRadius:5, borderSkipped:false
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>' '+fmt(c.parsed.x)}}
+      },
+      scales:{
+        x:{grid:grid(t),ticks:{...ticks(t),callback:v=>v.toLocaleString('es-ES')+' €'},border:{display:false}},
+        y:{grid:{display:false},ticks:ticks(t),border:{display:false}}
+      }
+    }
+  });
+})();
+
+/* ── 3. Canal de venta (donut) ───────────────────────────────────── */
+(function() {
+  const t = tok();
+  const ctx = document.getElementById('cCanal').getContext('2d');
+  new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels: DATA.canal.nombres,
+      datasets:[{
+        data: DATA.canal.totales,
+        backgroundColor:[t.accent,t.a2,t.a4],
+        borderColor:t.surf, borderWidth:3, hoverOffset:6
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{
+        legend:{position:'bottom',labels:{color:t.muted,padding:14,font:{size:12}}},
+        tooltip:{callbacks:{label:c=>' '+fmt(c.parsed)}}
+      }
+    }
+  });
+})();
+
+/* ── 4. Top clientes (barras custom HTML) ────────────────────────── */
+(function() {
+  const max = DATA.clientes[0].total;
+  const list = document.getElementById('clientList');
+  DATA.clientes.forEach(c => {
+    const pct = (c.total / max * 100).toFixed(1);
+    const row = document.createElement('div');
+    row.className = 'client-row';
+    row.innerHTML = `
+      <div class="client-name" title="${c.nombre}">${c.nombre}</div>
+      <div class="client-bar-outer">
+        <div class="client-bar-inner" style="width:${pct}%"></div>
+      </div>
+      <div class="client-amt">${fmt(c.total)}</div>
+    `;
+    list.appendChild(row);
+  });
+})();
+
+/* ── 5. Clientes por provincia (barras verticales) ───────────────── */
+(function() {
+  const t = tok();
+  const ctx = document.getElementById('cProvincia').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels: DATA.provincias.nombres,
+      datasets:[{
+        label:'Clientes',
+        data: DATA.provincias.clientes,
+        backgroundColor:[t.accent,t.a2,t.a3,t.a4],
+        borderRadius:6, borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>' '+c.parsed.y+' clientes'}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:ticks(t),border:{display:false}},
+        y:{grid:grid(t),ticks:{...ticks(t),stepSize:1},beginAtZero:true,border:{display:false}}
+      }
+    }
+  });
+})();
+</script>

@@ -1,0 +1,12 @@
+SELECT NombreCliente,Ciudad,Provincia FROM Clientes WHERE Provincia ='Alicante';
+SELECT NombreProducto,PrecioVenta FROM Productos WHERE PrecioVenta> 100;
+SELECT NombreProducto,Stock FROM Productos WHERE Stock< 20;
+SELECT NombreCliente,Ciudad,Provincia FROM Clientes WHERE Provincia <> 'Valencia';
+SELECT NombreCliente,Ciudad,Provincia FROM Clientes WHERE NOT Provincia = 'Valencia';
+SELECT * FROM Ventas WHERE FechaVenta BETWEEN '2025-01-01' AND '2025-03-31';
+SELECT NombreCliente,Provincia FROM Clientes WHERE Provincia = 'Alicante' OR Provincia = 'Murcia';
+SELECT NombreCliente,Provincia FROM Clientes WHERE Provincia IN ('Alicante','Murcia');
+SELECT NombreProducto,PrecioVenta FROM Productos WHERE PrecioVenta BETWEEN 50 AND 150;
+SELECT NombreCliente FROM Clientes WHERE NombreCliente like 'A%';
+SELECT NombreEmpleado FROM Empleados WHERE NombreEmpleado like '%ez';
+SELECT NombreProveedor,Telefono FROM Proveedores WHERE Telefono IS NOT NULL;

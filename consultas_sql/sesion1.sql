@@ -1,0 +1,45 @@
+SELECT * FROM Clientes;
+SELECT * FROM Productos;
+SELECT * FROM Ventas;
+SELECT NombreCliente,Ciudad FROM Clientes;
+SELECT NombreProducto,PrecioVenta FROM Productos;
+SELECT FechaVenta,IdCliente FROM Ventas;
+SELECT NombreCliente,Provincia FROM Clientes;
+SELECT NombreProducto,Stock FROM Productos;
+SELECT NombreProveedor,Ciudad FROM Proveedores;
+SELECT NombreEmpleado,Departamento FROM Empleados;
+SELECT DISTINCT Provincia FROM Clientes;
+SELECT DISTINCT Proveedores.Ciudad FROM Proveedores;
+SELECT DISTINCT NombreCategoria FROM Categorias;
+-- No tenemos tipo de IVA en los Productos
+-- Directamente no podemos, podremos mostrar las provincias de los clientes en los que hayan interveniso empleados
+SELECT NombreCliente FROM Clientes ORDER BY NombreCliente ASC;
+SELECT NombreProducto,PrecioVenta FROM Productos ORDER BY PrecioVenta DESC;
+SELECT NombreProducto,PrecioVenta FROM Productos ORDER BY PrecioVenta ASC;
+SELECT NombreProveedor,Ciudad FROM Proveedores ORDER BY Ciudad;
+SELECT * FROM Ventas ORDER BY FechaVenta ASC;
+SELECT * FROM Ventas ORDER BY FechaVenta DESC;
+SELECT substr(NombreEmpleado,1,instr(NombreEmpleado," ")-1) AS Nombre, substr(NombreEmpleado,instr(NombreEmpleado," ")+1) AS Apellido, Departamento FROM Empleados ORDER BY Apellido;
+SELECT * FROM Productos ORDER BY IdCategoria,NombreProducto;
+SELECT * FROM Clientes ORDER BY Provincia,NombreCliente ASC;
+SELECT * FROM Clientes LIMIT 5;
+SELECT * FROM Productos LIMIT 10;
+SELECT * FROM Ventas ORDER BY FechaVenta LIMIT 3;
+SELECT NombreProducto,PrecioVenta FROM Productos ORDER BY PrecioVenta DESC LIMIT 5;
+SELECT NombreProducto,PrecioVenta FROM Productos ORDER BY PrecioVenta ASC LIMIT 5;
+SELECT NombreProducto,PrecioVenta FROM Productos ORDER BY PrecioVenta DESC LIMIT 10;
+SELECT NombreProducto,Stock FROM Productos ORDER BY Stock ASC LIMIT 5;
+SELECT NombreCliente FROM Clientes ORDER BY NombreCliente ASC LIMIT 3;
+SELECT NombreProveedor FROM Proveedores ORDER BY NombreProveedor LIMIT 5;
+SELECT * FROM Ventas ORDER BY FechaVenta DESC, IdVenta LIMIT 10;
+SELECT DISTINCT Provincia FROM Clientes ORDER BY NombreCliente; -- Hay 4
+SELECT NombreCategoria FROM Categorias ORDER BY NombreCategoria ASC LIMIT 1;
+SELECT NombreProducto,PrecioVenta FROM Productos ORDER BY PrecioVenta DESC LIMIT 1;
+SELECT NombreCliente FROM Clientes ORDER BY NombreCliente LIMIT 1;
+SELECT NombreProveedor FROM Proveedores ORDER BY NombreProveedor DESC LIMIT 1;
+SELECT FechaVenta FROM Ventas ORDER BY FechaVenta DESC, IdVenta DESC LIMIT 1;
+SELECT NombreCliente FROM Clientes WHERE Provincia = 'Alicante';
+SELECT NombreCliente FROM Clientes WHERE Provincia = 'Alicante' AND Ciudad = 'Elche';
+SELECT NombreCliente FROM Clientes WHERE Provincia IN ('Alicante','Murcia','Valencia');
+SELECT * FROM Productos WHERE PrecioVenta BETWEEN 50 AND 100;
+SELECT * FROM Ventas WHERE FechaVenta BETWEEN '2025-01-01' AND '2025-03-31';

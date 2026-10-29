@@ -1,0 +1,4 @@
+IdProducto,NombreProducto,IdCategoria,IdProveedor,PrecioCoste,PrecioVenta,Stock,Activo
+1,Portátil Lenovo ThinkBook,1,1,620.0,799.0,18,1
+9,Mesa oficina 140cm,3,3,95.0,169.0,15,1
+10,Armario archivador,3,3,130.0,219.0,8,1

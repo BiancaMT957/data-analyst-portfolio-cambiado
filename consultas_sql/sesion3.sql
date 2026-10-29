@@ -1,0 +1,10 @@
+SELECT DISTINCT Ciudad FROM Clientes;
+SELECT * FROM Productos ORDER BY NombreProducto LIMIT 10;
+SELECT * FROM Proveedores ORDER BY NombreProveedor;
+SELECT NombreProducto,PrecioVenta FROM Productos ORDER BY PrecioVenta DESC LIMIT 1;
+SELECT NombreProducto,PrecioVenta FROM Productos ORDER BY PrecioVenta LIMIT 1;
+SELECT DISTINCT NombreCategoria FROM Categorias ORDER BY NombreCategoria;
+SELECT NombreEmpleado,Departamento FROM Empleados ORDER BY NombreEmpleado;
+SELECT * FROM Ventas ORDER BY FechaVenta,IdVenta LIMIT 1;
+SELECT * FROM Ventas ORDER BY FechaVenta DESC,IdVenta DESC LIMIT 1;
+SELECT DISTINCT Provincia,NombreCliente FROM Clientes ORDER BY Provincia;
